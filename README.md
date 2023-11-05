@@ -48,6 +48,34 @@ We also utilize supporting libraries like numpy, and you can find a complete
 list of requirements [here]().
 
 ## Building
-Without further adieu, let's begin building our system.
+Without further adieu, let's begin building our system. Our system will consist
+of two main building blocks:
+
+1. An object detection model which will accept a frame and perform 
+    object detection and tracking on the given frame
+2. A main loop which will fetch frames from a video stream, feed them into our 
+    detection system defined above, annotate the frames, and show them to our user
+
+Let's start with our object detection model, which is defined in [detector.py]().
+As is customary with any python project, let's import our required libraries:
+
+```python
+# For machine learning
+import torch
+# For array computations
+import numpy as np
+# For image decoding / editing
+import cv2
+# For environment variables
+import os
+# For detecting which ML Devices we can use
+import platform
+# For actually using the YOLO models
+from ultralytics import YOLO
+```
+
+As discussed above, the two most important libraries we will be using are
+openCV and ultralytics. Numpy will also be used pretty heavily for array type
+operations (as images are really just arrays of pixel values).
 
 ## Running
