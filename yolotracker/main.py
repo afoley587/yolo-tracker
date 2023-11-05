@@ -35,6 +35,8 @@ def main():
     # To Analyze Frames
     detector = YoloV8ImageObjectDetection(to_track)
 
+    if (not detector.is_detectable(to_track)):
+        raise ValueError(f"Error: My detecto does not know how to detect {to_track}!")
     # The object tracks we have seen before
     track_history = defaultdict(lambda: [])
 

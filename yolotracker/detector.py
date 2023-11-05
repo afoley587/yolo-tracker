@@ -47,12 +47,16 @@ class YoloV8ImageObjectDetection:
         self.model = self._load_model()
         self.device = self._get_device()
         self.classes = self.model.names
-        self.looking_for = list(self.classes.keys())[list(self.classes.values()).index(looking_for)]
 
-        if (self.looking_for < 0):
-            print(self.model.names)
-            raise("Error, I dont know that label!")
+    def _load_model(self):
+        """Loads Yolo8 model from pytorch hub or a path on disk
 
+        Returns:
+            model (Model) - Trained Pytorch model
+        """
+        model = YOLO(YoloV8ImageObjectDetection.PATH)
+        return model
+    
     def _get_device(self):
         """Gets best device for your system
 
@@ -65,16 +69,15 @@ class YoloV8ImageObjectDetection:
             return "cuda"
         return "cpu"
 
-    def _load_model(self):
-        """Loads Yolo8 model from pytorch hub or a path on disk
+    def is_detectable(self, classname):
+        looking_for = list(self.classes.keys())[list(self.classes.values()).index(classname)]
 
-        Returns:
-            model (Model) - Trained Pytorch model
-        """
-        model = YOLO(YoloV8ImageObjectDetection.PATH)
-        return model
+        if (looking_for < 0):
+            return False
+        
+        return True
 
-    def detect(self, frame):
+    def detect(self, frame, looking_for):
         """Analyze a frame using a YOLOv8 model to find any of the classes
         in question
 
@@ -86,7 +89,7 @@ class YoloV8ImageObjectDetection:
             boxes (torch.Tensor): A set of bounding boxes
             tracks (list): A list of box IDs
         """
-        results = self.model.track(frame, persist=True, conf=YoloV8ImageObjectDetection.CONF_THRESH, classes = [self.looking_for])
+        results = self.model.track(frame, persist=True, conf=YoloV8ImageObjectDetection.CONF_THRESH, classes = [looking_for])
 
         plotted = results[0].plot()
         boxes   = results[0].boxes.xywh.cpu()
