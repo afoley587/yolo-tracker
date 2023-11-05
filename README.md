@@ -1,5 +1,6 @@
+# Computer Vision For All - Object Tracking With YOLO and Python
 
-# Introduction
+## Introduction
 In the ever-evolving realm of computer vision and artificial intelligence, 
 object tracking stands as a pivotal concept, serving as the linchpin to 
 countless applications, from autonomous vehicles to surveillance systems and 
@@ -24,3 +25,9 @@ potential, delve into the technical intricacies of object tracking, and reveal h
 extract valuable insights about the motion of tracked objects. By the end, you'll be 
 equipped with the knowledge and tools to implement your very own object tracking solutions,
 while also unlocking a deeper understanding of the dynamic world within your videos and images.
+
+## Libraries and References
+
+## Building
+
+## Running
