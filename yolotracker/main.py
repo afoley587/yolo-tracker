@@ -33,10 +33,11 @@ def main():
 
     # The YOLOv8 Detection Wrapper We Will Use
     # To Analyze Frames
-    detector = YoloV8ImageObjectDetection(to_track)
+    detector = YoloV8ImageObjectDetection()
 
     if (not detector.is_detectable(to_track)):
         raise ValueError(f"Error: My detecto does not know how to detect {to_track}!")
+    
     # The object tracks we have seen before
     track_history = defaultdict(lambda: [])
 
@@ -53,7 +54,7 @@ def main():
 
         # Use our detector to plot the bounding boxes on the frame,
         # give us our bounding boxes, and our object tracks
-        frame, boxes, track_ids = detector.detect(frame)
+        frame, boxes, track_ids = detector.detect(frame, to_track)
 
         # For each bounding box and track we found,
         # We can calculate the box center and draw it and

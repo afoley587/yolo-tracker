@@ -13,11 +13,13 @@ from ultralytics import YOLO
 
 
 class YoloV8ImageObjectDetection:
-    PATH        = os.environ.get("YOLO_WEIGHTS_PATH", "yolov8n.pt")    # Path to a model. yolov8n.pt means download from PyTorch Hub
-    CONF_THRESH = float(os.environ.get("YOLO_CONF_THRESHOLD", "0.50")) # Confidence threshold
 
-    def __init__(self, looking_for):
+    def __init__(self, model_path="yolov8n.pt", conf_threshold=0.50):
         """Initializes a yolov8 detector
+
+        Arguments:
+            model_path (str): A path to a pretrained model file or one on torchub
+            conf_threshold (float): Confidence threshold for detections
 
         Default Model Supports The Following:
 
@@ -44,17 +46,20 @@ class YoloV8ImageObjectDetection:
             79: 'toothbrush'
         }      
         """
-        self.model = self._load_model()
+        self.conf_threshold = conf_threshold
+        self.model = self._load_model(model_path)
         self.device = self._get_device()
         self.classes = self.model.names
 
-    def _load_model(self):
+    def _load_model(self, model_path):
         """Loads Yolo8 model from pytorch hub or a path on disk
 
+        Arguments:
+            model_path (str):  A path to a pretrained model file or one on torchub
         Returns:
             model (Model) - Trained Pytorch model
         """
-        model = YOLO(YoloV8ImageObjectDetection.PATH)
+        model = YOLO(model_path)
         return model
     
     def _get_device(self):
@@ -70,26 +75,47 @@ class YoloV8ImageObjectDetection:
         return "cpu"
 
     def is_detectable(self, classname):
-        looking_for = list(self.classes.keys())[list(self.classes.values()).index(classname)]
+        """Sees if a desired class is in our models known labels
+
+        Arguments:
+            classname (str): Class name to search our model for
+        
+        Returns:
+            exists: True if class is in model, False otherwise
+        """
+        looking_for = self.classname_to_id(classname)
 
         if (looking_for < 0):
             return False
         
         return True
 
-    def detect(self, frame, looking_for):
+    def classname_to_id(self, classname):
+        """Searches our model's values for a given class name
+
+        Arguments:
+            classname (str): Class name to search our model for
+        
+        Returns:
+            idx (int): Index of the class if it exists, -1 otherwise
+        """
+        return list(self.classes.keys())[list(self.classes.values()).index(classname)]
+    
+    def detect(self, frame, classname):
         """Analyze a frame using a YOLOv8 model to find any of the classes
         in question
 
         Arguments:
             frame (numpy.ndarray): The frame to analyze (from cv2)
+            classname (str): Class name to search our model for
         
         Returns:
             plotted (numpy.ndarray): Frame with bounding boxes and labels ploted on it.
             boxes (torch.Tensor): A set of bounding boxes
             tracks (list): A list of box IDs
         """
-        results = self.model.track(frame, persist=True, conf=YoloV8ImageObjectDetection.CONF_THRESH, classes = [looking_for])
+        looking_for = self.classname_to_id(classname)
+        results = self.model.track(frame, persist=True, conf=self.conf_threshold, classes = [looking_for])
 
         plotted = results[0].plot()
         boxes   = results[0].boxes.xywh.cpu()
