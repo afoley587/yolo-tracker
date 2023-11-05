@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "yolotracker"
+version = "0.1.0"
+description = ""
+authors = ["Alexander Foley <alexandergfoley@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+opencv-python = "^4.8.1.78"
+ultralytics = "^8.0.203"
+numpy = "^1.26.1"
+cython = "^3.0.5"
+lapx = "^0.5.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
