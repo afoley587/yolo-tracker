@@ -9,6 +9,8 @@ significant attention. In this blog post, we explore the world of
 YOLOv8 object tracking, showcasing its capabilities and adding intelligence 
 by analyzing tracked object statistics.
 
+![Intro](./images/thumnbail.png)
+
 Our Python-based project harnesses YOLOv8's power for highly accurate 
 real-time object tracking. But we go a step further by examining 
 tracked objects' movements, measuring distances traveled in pixels, 
@@ -46,5 +48,6 @@ We also utilize supporting libraries like numpy, and you can find a complete
 list of requirements [here]().
 
 ## Building
+Without further adieu, let's begin building our system.
 
 ## Running
