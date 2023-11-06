@@ -1,11 +1,24 @@
-from detector import YoloV8ImageObjectDetection
-import cv2
-import numpy as np
+# Using defaultdict so we dont have to
+# do if key in dict checks
 from collections import defaultdict
+# For distance calculations
 import math
+# For opening, reading, and writing video frames
+import cv2
+# For array operations
+import numpy as np
+# Our custom detector
+from detector import YoloV8ImageObjectDetection
 
 def main():
-    to_track = input("What would you like to track? ")
+    to_track = input("What would you like to track? ").strip().lower()
+
+    # The YOLOv8 Detection Wrapper We Will Use
+    # To Analyze Frames
+    detector = YoloV8ImageObjectDetection()
+
+    if (not detector.is_detectable(to_track)):
+        raise ValueError(f"Error: My detecto does not know how to detect {to_track}!")
 
     # Create a video capture instance.
     # VideoCapture(0) corresponds to your computers
@@ -30,13 +43,6 @@ def main():
     )
 
     cv2.namedWindow('Video')
-
-    # The YOLOv8 Detection Wrapper We Will Use
-    # To Analyze Frames
-    detector = YoloV8ImageObjectDetection()
-
-    if (not detector.is_detectable(to_track)):
-        raise ValueError(f"Error: My detecto does not know how to detect {to_track}!")
     
     # The object tracks we have seen before
     track_history = defaultdict(lambda: [])

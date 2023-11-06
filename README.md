@@ -211,5 +211,174 @@ We are now ready to use our detector in a main loop or to run through video
 frames.
 
 ## II. Building The Main Loop
+Our main loop will do a few things:
+1. Register an object to track from our user
+2. Instantiate our object detector
+3. Open a video input and output stream
+4. Read frames from our input stream, feed them to our detector
+5. Show the analyzed frames to the user and write thenm to our output stream
+
+Let's start, as always, with our imports:
+
+```python
+# Using defaultdict so we dont have to
+# do if key in dict checks
+from collections import defaultdict
+# For distance calculations
+import math
+# For opening, reading, and writing video frames
+import cv2
+# For array operations
+import numpy as np
+# Our custom detector
+from detector import YoloV8ImageObjectDetection
+```
+
+We can then enter our main function:
+
+```python
+def main():
+    to_track = input("What would you like to track? ").strip().lower()
+
+    # The YOLOv8 Detection Wrapper We Will Use
+    # To Analyze Frames
+    detector = YoloV8ImageObjectDetection()
+
+    if (not detector.is_detectable(to_track)):
+        raise ValueError(f"Error: My detecto does not know how to detect {to_track}!")
+```
+
+The first thing we do is ask the user for an object they would like to track. In this
+demo, I'll be using a `cell phone`, which is in the default YOLO model. We then do a quick
+sanity check to make sure that our model can actually detect the object from the user.
+
+We then open our video streams using OpenCV:
+
+```python
+    # Create a video capture instance.
+    # VideoCapture(0) corresponds to your computers
+    # webcam
+    cap = cv2.VideoCapture(0)
+
+    # Lets grab the frames-per-second (FPS) of the
+    # webcam so our output has a similar FPS.
+    # Lets also grab the height and width so our
+    # output is the same size as the webcam
+    fps          = cap.get(cv2.CAP_PROP_FPS)
+    frame_width  = int(cap.get(3))
+    frame_height = int(cap.get(4))
+
+    # Now lets create the video writer. We will
+    # write our processed frames to this object
+    # to create the processed video.
+    out = cv2.VideoWriter('outpy.avi', 
+        cv2.VideoWriter_fourcc('M','J','P','G'), 
+        fps, 
+        (frame_width,frame_height)
+    )
+
+    cv2.namedWindow('Video')
+```
+
+The `cv2.VideoCapture(0)` will open up, on most computers, the onboard
+webcam of the current laptop. We will use the webcam as our input stream.
+We then just want to grab a few details from the device so that our
+input stream and output vide have the same frame rates, sizes, etc.
+
+Now it's time to read, analyze, and write our frames:
+
+```python
+    # The object tracks we have seen before
+    track_history = defaultdict(lambda: [])
+
+    # Previous frames, a frame count, and distance/speed
+    # variables
+    prev = None
+    count = 1
+    dist = 0
+    speed = 0
+
+    while(True):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+
+        if not ret:
+            continue
+
+        # Use our detector to plot the bounding boxes on the frame,
+        # give us our bounding boxes, and our object tracks
+        frame, boxes, track_ids = detector.detect(frame, to_track)
+
+        # For each bounding box and track we found,
+        # We can calculate the box center and draw it and
+        # the track on the screen. Tracks will be represented
+        # as polylines created from our track
+        for box, track_id in zip(boxes, track_ids):
+            x, y, w, h = box
+            track = track_history[track_id]
+            track.append((float(x), float(y)))  # x, y center point
+            if len(track) > 60: # Only hold the most recent 60 tracks
+                track.pop(0)
+
+            # Draw the tracking lines
+            points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
+            cv2.polylines(frame, [points], isClosed=False, color=(230, 230, 230), thickness=10)
+
+            # Add the distance between the previous box center and this box center
+            # to help us keep track of the total pixel distance
+            if prev:
+                dist += math.hypot(float(x)-float(prev[0]), float(y)-float(prev[1]))
+
+            # Update our previous pointer
+            prev = (float(x), float(y))
+
+        # Calculate speed as total pixel distance / number of frames so that
+        # we get average pixels moved / frame
+        speed = dist / count
+        count += 1
+        cv2.putText(frame, f"Distance Covered (pixels): {dist:.5f}", (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4)
+        cv2.putText(frame, f"Average Speed (pixes/frame): {speed:.5f} ", (0, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0), 4)
+
+        # Write to our output file
+        out.write(frame)
+
+        # Show the frame
+        cv2.imshow('Video', frame)
+        
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+```
+
+First, we read each frame by calling `cap.read()`. This reads a single
+frame from our camera device. We then pass that frame and our desired class
+into our detector, which returns us an annotated frame, the bounding box
+coordinates, and the track ids (box ids).
+
+Now that we have our bounding boxes and ids, we can loop through them together. For
+each bounding box we find, we first see if it is in our `track_history` dictionary.
+If it is, this is not a new track, and we can continue appending our track points to it.
+We can then convert our points into a numpy array and then draw them on our annotated frame
+with `cv2.polylines`.
+
+The last thing we have to do is calculate the distance moved from our last known 
+track point using `math.hypot` and then finally, we can update our prev pointer 
+to the new last-seen coordinates.
+
+Before exiting this loop iteration, we also want to calculate our total speed, defined
+as pixels traveled / number of frames and then show our statistics on the frame 
+using `cv2.putText`.
+
+So, to summarize:
+
+* While running...
+    * We can read each frame with `cap.read()`
+    * We can pass the frame into our detector with `detector.detect()`
+    * We loop through all of the bounding boxes and draw the track points with
+        `cv2.polylines()`
+    * We calculate our total distances and average speeds
+    * We write the statistics on the frame with `cv2.putText()`
+
+At this point, we have completed the implementation stage of our project and we
+are ready to run it.
 
 ## Running
