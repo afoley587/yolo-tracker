@@ -47,7 +47,7 @@ as an essential resource in the deep learning and computer vision community.
 We also utilize supporting libraries like numpy, and you can find a complete 
 list of requirements [here]().
 
-## Building
+## I. Building The Detector
 Without further adieu, let's begin building our system. Our system will consist
 of two main building blocks:
 
@@ -157,6 +157,59 @@ Our `__init__` function takes two parameters:
 Our `__init__` function then loads our model by instantiating a new `YOLO` object
 with the `model_path` parameter. It then uses platform detection to see if either `mps`
 or `cuda` are available on your system. Either of those will be much faster than the default
-`cpu`.
+`cpu`. As we exit our `__init__` our model has been loaded, our confidence threshold set, and
+our class names defined. Now we are ready to move onward.
+
+To perform detections, our detector has three other methods:
+
+1. `is_detectable` - Sees if a requested class is detectable by our model
+2. `classname_to_id` - Translates a string classname to its integer ID
+3. `detect` - Performs object tracking and detection
+
+`is_detectable` and `classname_to_id` are helper functions, and we will omit
+them from this discussion because they are relatively simple. `detect`, on the
+other hand, is shown in full below:
+
+```python
+    def detect(self, frame, classname):
+        """Analyze a frame using a YOLOv8 model to find any of the classes
+        in question
+
+        Arguments:
+            frame (numpy.ndarray): The frame to analyze (from cv2)
+            classname (str): Class name to search our model for
+        
+        Returns:
+            plotted (numpy.ndarray): Frame with bounding boxes and labels ploted on it.
+            boxes (torch.Tensor): A set of bounding boxes
+            tracks (list): A list of box IDs
+        """
+        looking_for = self.classname_to_id(classname)
+        results = self.model.track(frame, persist=True, conf=self.conf_threshold, classes = [looking_for])
+
+        plotted = results[0].plot()
+        boxes   = results[0].boxes.xywh.cpu()
+        tracks  = results[0].boxes.id.int().cpu().tolist() if results[0].boxes.id else []
+        return plotted, boxes, tracks 
+```
+
+The `detect` function takes two parameters, the frame to analyze and a class
+to look for. Note that, in our project, we only want to track one object at
+a time, hence this argument.
+
+We first translate the string classname to its integer id and then call our
+YOLO model using the `track()` method. We pass the frame, confidence, and 
+single class that we are looking for into the `track()` method which returns
+us a list of YOLO Result objects. We then use the `Result.plot()` to plot
+the bounding boxes onto the frame, get the x, y, width, and height of the bounding
+boxes, and finally get the id's of the bounding boxes. The coordinates of our
+bounding boxes will be used to draw our tracks, while the box ids will be used
+to keep a record of which track belongs to which box. Finally, we can return 
+our plotted frame, box coordinates, and box ids (track ids) back to the caller.
+
+We are now ready to use our detector in a main loop or to run through video
+frames.
+
+## II. Building The Main Loop
 
 ## Running
