@@ -45,7 +45,7 @@ vehicles, surveillance systems, and medical image analysis, earning recognition
 as an essential resource in the deep learning and computer vision community.
 
 We also utilize supporting libraries like numpy, and you can find a complete 
-list of requirements [here]().
+list of requirements [here](https://github.com/afoley587/yolo-tracker/blob/main/requirements.txt).
 
 ## I. Building The Detector
 Without further adieu, let's begin building our system. Our system will consist
@@ -382,3 +382,25 @@ At this point, we have completed the implementation stage of our project and we
 are ready to run it.
 
 ## Running
+Please make sure to install the necessary 
+[requirements](https://github.com/afoley587/yolo-tracker/blob/main/requirements.txt) 
+first (with either pip, venv, poetry, etc).
+
+After that, it's as simple as running the commands below:
+
+```shell
+prompt> python yolotracker/main.py
+What would you like to track? cell phone
+
+0: 384x640 (no detections), 42.4ms
+Speed: 2.0ms preprocess, 42.4ms inference, 0.4ms postprocess per image at shape (1, 3, 384, 640)
+
+0: 384x640 (no detections), 46.4ms
+Speed: 1.6ms preprocess, 46.4ms inference, 0.7ms postprocess per image at shape (1, 3, 384, 640)
+
+0: 384x640 (no detections), 45.6ms
+Speed: 1.4ms preprocess, 45.6ms inference, 0.6ms postprocess per image at shape (1, 3, 384, 640)
+
+0: 384x640 (no detections), 43.8ms
+Speed: 1.6ms preprocess, 43.8ms inference, 0.6ms postprocess per image at shape (1, 3, 384, 640)
+```

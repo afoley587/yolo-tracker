@@ -58,6 +58,9 @@ def main():
         # Capture frame-by-frame
         ret, frame = cap.read()
 
+        if not ret:
+            continue
+
         # Use our detector to plot the bounding boxes on the frame,
         # give us our bounding boxes, and our object tracks
         frame, boxes, track_ids = detector.detect(frame, to_track)
