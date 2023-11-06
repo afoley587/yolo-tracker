@@ -404,3 +404,20 @@ Speed: 1.4ms preprocess, 45.6ms inference, 0.6ms postprocess per image at shape 
 0: 384x640 (no detections), 43.8ms
 Speed: 1.6ms preprocess, 43.8ms inference, 0.6ms postprocess per image at shape (1, 3, 384, 640)
 ```
+
+You can see an output video below:
+![Demo](./images/demo-tracker.gif)
+
+You can see that when the phone is in screen, a few things happen:
+
+1. Very clearly, we append track points to the screen and track the center
+    point of the bounding box
+2. Our distance traveled keeps increasing
+3. Our speed averages keep changing, depending on how fast we're moving
+
+When the phone exits the screen, we see our speed begin to drop because
+the phone is no longer "moving" to the system. When the phone re-enters
+the screen, our tracks pick up right where we left off!
+
+Thanks for reading along! Please visit the [github repo](https://github.com/afoley587/yolo-tracker)
+for all of the code!
